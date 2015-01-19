@@ -10,7 +10,9 @@
 
 @interface RootViewController () <UITableViewDelegate, UITableViewDataSource>
 @property (weak, nonatomic) IBOutlet UITableView *eventsTableView;
-@property NSDictionary *events;
+@property NSDictionary *allEvents;
+@property NSArray *resultsArray;
+
 
 @end
 
@@ -25,23 +27,26 @@
                                        queue:[NSOperationQueue mainQueue]
                            completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
      {
-         self.events = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
+         self.allEvents = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&connectionError];
+
+         self.resultsArray = [self.allEvents objectForKey:@"results"];
          [self.eventsTableView reloadData];
      }];
 }
 
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.events.count;
+    return self.resultsArray.count;
 }
 
 -(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"EventCell"];
-    NSArray *eventArray = [self.events objectForKey:@"results"];
-  NSDictionary *event = [eventArray objectAtIndex:indexPath.row];
+    NSArray *resultsArray = [self.allEvents objectForKey:@"results"];
+  NSDictionary *event = [resultsArray objectAtIndex:indexPath.row];
+    NSDictionary *venue = [event objectForKey:@"venue"];
 
     cell.textLabel.text = [event objectForKey:@"name"];
-    cell.detailTextLabel.text = [event objectForKey:@"city"];
+    cell.detailTextLabel.text = [venue objectForKey:@"address_1"];
     return cell;
 }
 
